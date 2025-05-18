@@ -1,0 +1,14 @@
+{
+  "ID": "2270582985BF420D9686F22A62911160",
+  "ActionKeyword": "dev",
+  "IsGlobal": true,
+  "Name": "DevTools",
+  "Author": "Enzo CACERES",
+  "Version": "1.0.0",
+  "Language": "csharp",
+  "Website": "https://github.com/Caceresenzo/Community.PowerToys.Run.Plugin.DevTools",
+  "ExecuteFileName": "Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools.dll",
+  "IcoPathDark": "Images\\devtools.dark.png",
+  "IcoPathLight": "Images\\devtools.light.png",
+  "DynamicLoading": false
+}
