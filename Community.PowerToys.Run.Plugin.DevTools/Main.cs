@@ -43,33 +43,65 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         {
             Logger.LogInfo($"Query: `{query.Search}`");
             var parts = query.Search.Split(Wox.Plugin.Query.TermSeparator, 2);
-            if (parts.Length != 2)
+
+            var commandName = parts[0].ToUpper();
+            var rest = parts.Length > 1 ? parts[1] : string.Empty;
+
+            var hash = TryHash(commandName, rest);
+            if (!string.IsNullOrWhiteSpace(hash))
             {
-                var prefix = parts[0];
-                return Recommand(query.ActionKeyword, parts[0]);
+                var lowerHash = hash.ToLowerInvariant();
+
+                return
+                [
+                    new Result
+                    {
+                        QueryTextDisplay = query.Search,
+                        IcoPath = IconPath,
+                        Title = hash,
+                        SubTitle = $"{commandName}({rest}).upper()",
+                        Action = _ =>
+                        {
+                            Clipboard.SetDataObject(hash);
+                            return true;
+                        },
+                    },
+                    new Result
+                    {
+                        QueryTextDisplay = query.Search,
+                        IcoPath = IconPath,
+                        Title = lowerHash,
+                        SubTitle = $"{commandName}({rest}).lower()",
+                        Action = _ =>
+                        {
+                            Clipboard.SetDataObject(lowerHash);
+                            return true;
+                        },
+                    }
+                ];
             }
 
-            var algorithmName = parts[0].ToUpper();
-            var content = parts[1];
-
-            var hash = Hash(algorithmName, content);
-
-            return
-            [
-                new Result
-                {
-                    QueryTextDisplay = hash,
-                    IcoPath = IconPath,
-                    Title = hash,
-                    SubTitle = $"{algorithmName}({content})",
-                    Action = hashData =>
+            var uuid = TryUuid(commandName);
+            if (!string.IsNullOrWhiteSpace(uuid))
+            {
+                return
+                [
+                    new Result
                     {
-                        Clipboard.SetDataObject(hashData);
-                        return true;
-                    },
-                    ContextData = hash,
-                }
-            ];
+                        QueryTextDisplay = query.Search,
+                        IcoPath = IconPath,
+                        Title = uuid,
+                        SubTitle = "Version 4: Randomly generated UUID",
+                        Action = _ =>
+                        {
+                            Clipboard.SetDataObject(uuid);
+                            return true;
+                        },
+                    }
+                ];
+            }
+
+            return Recommand(query.ActionKeyword, parts[0]);
         }
 
         public List<Result> Recommand(string actionKeyword, string prefix)
@@ -93,6 +125,19 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     },
                 });
             }
+
+            results.Add(new Result
+            {
+                IcoPath = IconPath,
+                Title = $"uuid - Generate a random UUID",
+                SubTitle = $"Example: uuid",
+                QueryTextDisplay = $"uuid ",
+                Action = _ =>
+                {
+                    Context.API.ChangeQuery($"{actionKeyword} uuid ");
+                    return false;
+                },
+            });
 
             if (!string.IsNullOrWhiteSpace(prefix))
             {
@@ -187,7 +232,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 KeyValuePair.Create("sha512", (byte[] input) => System.Security.Cryptography.SHA512.HashData(input)),
             ]);
 
-        public static string Hash(string algorithmName, string input)
+        public static string TryHash(string algorithmName, string input)
         {
             algorithmName = algorithmName.ToLowerInvariant().Trim();
 
@@ -202,6 +247,18 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             var hashBytes = algorithm(inputBytes);
 
             return Convert.ToHexString(hashBytes);
+        }
+
+        public static string TryUuid(string uuidName)
+        {
+            uuidName = uuidName.ToLowerInvariant().Trim();
+
+            if (uuidName != "uuid")
+            {
+                return null;
+            }
+
+            return Guid.NewGuid().ToString("D");
         }
 
     }
