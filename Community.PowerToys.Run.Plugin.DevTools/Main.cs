@@ -111,7 +111,24 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 results.RemoveAll(result => !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             }
 
-            results.Sort((x, y) => string.Compare(x.Title, y.Title, StringComparison.OrdinalIgnoreCase));
+            if (results.Count == 0)
+            {
+                results.Add(new Result
+                {
+                    IcoPath = IconPath,
+                    Title = $"No command starts with: {prefix}",
+                    SubTitle = "Press the Enter key to return to the command list",
+                    Action = _ =>
+                    {
+                        Context.API.ChangeQuery($"{actionKeyword} ", true);
+                        return false;
+                    },
+                });
+            }
+            else
+            {
+                results.Sort((x, y) => string.Compare(x.Title, y.Title, StringComparison.OrdinalIgnoreCase));
+            }
 
             return results;
         }
