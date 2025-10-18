@@ -1,6 +1,7 @@
 using ManagedCommon;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Windows;
 using System.Windows.Input;
 using Wox.Plugin;
@@ -41,10 +42,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         public List<Result> Query(Query query)
         {
             Logger.LogInfo($"Query: `{query.Search}`");
-            var parts = query.Search.Split(" ", 2);
+            var parts = query.Search.Split(Wox.Plugin.Query.TermSeparator, 2);
             if (parts.Length != 2)
             {
-                return [];
+                var prefix = parts[0];
+                return Recommand(query.ActionKeyword, parts[0]);
             }
 
             var algorithmName = parts[0].ToUpper();
@@ -59,16 +61,47 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     QueryTextDisplay = hash,
                     IcoPath = IconPath,
                     Title = hash,
-                    SubTitle = $"{algorithmName} Hash",
-                    ToolTipData = new ToolTipData("Hashed from", content),
-                    Action = _ =>
+                    SubTitle = $"{algorithmName}({content})",
+                    Action = hashData =>
                     {
-                        Clipboard.SetDataObject(hash);
+                        Clipboard.SetDataObject(hashData);
                         return true;
                     },
                     ContextData = hash,
                 }
             ];
+        }
+
+        public List<Result> Recommand(string actionKeyword, string prefix)
+        {
+            List<Result> results = [];
+
+            foreach (var entry in HashAlgorithms)
+            {
+                var algorithmName = entry.Key.ToLowerInvariant();
+
+                results.Add(new Result
+                {
+                    IcoPath = IconPath,
+                    Title = $"{algorithmName} - Hash a string with {algorithmName.ToUpperInvariant()}",
+                    SubTitle = $"Example: {algorithmName} <your input>",
+                    QueryTextDisplay = $"{algorithmName} ",
+                    Action = _ =>
+                    {
+                        Context.API.ChangeQuery($"{actionKeyword} {algorithmName} ");
+                        return false;
+                    },
+                });
+            }
+
+            if (!string.IsNullOrWhiteSpace(prefix))
+            {
+                results.RemoveAll(result => !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+            }
+
+            results.Sort((x, y) => string.Compare(x.QueryTextDisplay, y.QueryTextDisplay, StringComparison.OrdinalIgnoreCase));
+
+            return results;
         }
 
         /// <summary>
@@ -145,25 +178,28 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         private void OnThemeChanged(Theme currentTheme, Theme newTheme) => UpdateIconPath(newTheme);
 
+        public static readonly ImmutableDictionary<string, Func<byte[], byte[]>> HashAlgorithms =
+            ImmutableDictionary.CreateRange([
+                KeyValuePair.Create("md5",    (byte[] input) => System.Security.Cryptography.MD5.HashData(input)),
+                KeyValuePair.Create("sha1",   (byte[] input) => System.Security.Cryptography.SHA1.HashData(input)),
+                KeyValuePair.Create("sha256", (byte[] input) => System.Security.Cryptography.SHA256.HashData(input)),
+                KeyValuePair.Create("sha384", (byte[] input) => System.Security.Cryptography.SHA384.HashData(input)),
+                KeyValuePair.Create("sha512", (byte[] input) => System.Security.Cryptography.SHA512.HashData(input)),
+            ]);
+
         public static string Hash(string algorithmName, string input)
         {
-            using System.Security.Cryptography.HashAlgorithm algorithm = algorithmName.ToUpper() switch
-            {
-                "MD5" => System.Security.Cryptography.MD5.Create(),
-                "SHA1" => System.Security.Cryptography.SHA1.Create(),
-                "SHA256" => System.Security.Cryptography.SHA256.Create(),
-                "SHA384" => System.Security.Cryptography.SHA384.Create(),
-                "SHA512" => System.Security.Cryptography.SHA512.Create(),
-                _ => null,
-            };
+            algorithmName = algorithmName.ToLowerInvariant().Trim();
 
-            if (algorithm == null)
+            if (!HashAlgorithms.ContainsKey(algorithmName))
             {
                 return null;
             }
 
-            byte[] inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
-            byte[] hashBytes = algorithm.ComputeHash(inputBytes);
+            var algorithm = HashAlgorithms.GetValueOrDefault(algorithmName.ToLowerInvariant());
+
+            var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
+            var hashBytes = algorithm(inputBytes);
 
             return Convert.ToHexString(hashBytes);
         }
