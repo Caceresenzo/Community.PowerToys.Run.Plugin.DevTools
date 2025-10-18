@@ -40,7 +40,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
-            if (!HashAlgorithms.ContainsKey(commandName))
+            if (!HashAlgorithms.ContainsKey(commandName) || string.IsNullOrWhiteSpace(arguments))
             {
                 return null;
             }
@@ -235,6 +235,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
+            if (string.IsNullOrWhiteSpace(arguments))
+            {
+                return null;
+            }
+
             if (commandName == LowerCommandName)
             {
                 return [
