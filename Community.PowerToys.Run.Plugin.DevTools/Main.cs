@@ -101,6 +101,26 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 ];
             }
 
+            var lorem = TryLorem(commandName);
+            if (!string.IsNullOrWhiteSpace(lorem))
+            {
+                return
+                [
+                    new Result
+                    {
+                        QueryTextDisplay = query.Search,
+                        IcoPath = IconPath,
+                        Title = lorem,
+                        SubTitle = "Single sentence",
+                        Action = _ =>
+                        {
+                            Clipboard.SetDataObject(lorem);
+                            return true;
+                        },
+                    }
+                ];
+            }
+
             return Recommand(query.ActionKeyword, parts[0]);
         }
 
@@ -135,6 +155,19 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 Action = _ =>
                 {
                     Context.API.ChangeQuery($"{actionKeyword} uuid ");
+                    return false;
+                },
+            });
+
+            results.Add(new Result
+            {
+                IcoPath = IconPath,
+                Title = $"lorem - Get a lorem ipsum text",
+                SubTitle = $"Example: lorem",
+                QueryTextDisplay = $"lorem ",
+                Action = _ =>
+                {
+                    Context.API.ChangeQuery($"{actionKeyword} lorem ");
                     return false;
                 },
             });
@@ -259,6 +292,18 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             }
 
             return Guid.NewGuid().ToString("D");
+        }
+
+        public static string TryLorem(string command)
+        {
+            command = command.ToLowerInvariant().Trim();
+
+            if (command != "lorem")
+            {
+                return null;
+            }
+
+            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
         }
 
     }
