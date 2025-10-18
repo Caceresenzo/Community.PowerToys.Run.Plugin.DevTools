@@ -228,4 +228,55 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         }
     }
 
+    public class CaseDataGenerator : IDataGenerator
+    {
+        public const string LowerCommandName = "lower";
+        public const string UpperCommandName = "upper";
+
+        public List<GeneratedValue> GenerateValues(string commandName, string arguments)
+        {
+            if (commandName == LowerCommandName)
+            {
+                return [
+                    new GeneratedValue
+                    {
+                        Value = arguments.ToLowerInvariant(),
+                        SubTitle = $"LOWER({arguments})"
+                    },
+                ];
+            }
+
+            if (commandName == UpperCommandName)
+            {
+                return [
+                    new GeneratedValue
+                    {
+                        Value = arguments.ToUpperInvariant(),
+                        SubTitle = $"UPPER({arguments})"
+                    },
+                ];
+            }
+
+            return null;
+        }
+
+        public List<Recommandation> Recommand()
+        {
+            return [
+                new Recommandation
+                {
+                    SubCommand = LowerCommandName,
+                    Title = $"{LowerCommandName} - Lowercase a string",
+                    SubTitle = $"Example: ${LowerCommandName} <input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = UpperCommandName,
+                    Title = $"{UpperCommandName} - Uppercase a string",
+                    SubTitle = $"Example: {UpperCommandName} <input>",
+                }
+            ];
+        }
+    }
+
 }
