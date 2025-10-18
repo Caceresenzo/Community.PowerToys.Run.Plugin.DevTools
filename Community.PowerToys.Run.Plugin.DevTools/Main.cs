@@ -56,21 +56,23 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             {
                 var values = generator.GenerateValues(commandName, arguments);
 
-                if (values != null && values.Count > 0)
+                if (values == null || values.Count == 0)
                 {
-                    return values.ConvertAll(value => new Result
-                    {
-                        QueryTextDisplay = query.Search,
-                        IcoPath = IconPath,
-                        Title = value.Title ?? value.Value,
-                        SubTitle = value.SubTitle,
-                        Action = _ =>
-                        {
-                            Clipboard.SetDataObject(value.Value);
-                            return true;
-                        },
-                    });
+                    continue;
                 }
+
+                return values.ConvertAll(value => new Result
+                {
+                    QueryTextDisplay = query.Search,
+                    IcoPath = IconPath,
+                    Title = value.Title ?? value.Value,
+                    SubTitle = value.SubTitle,
+                    Action = _ =>
+                    {
+                        Clipboard.SetDataObject(value.Value);
+                        return true;
+                    },
+                });
             }
 
             return Recommand(query.ActionKeyword, commandName);
@@ -97,7 +99,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     QueryTextDisplay = $"{recommandation.SubCommand} ",
                     Action = _ =>
                     {
-                        Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ");
+                        Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ", true);
                         return false;
                     },
                 }));
