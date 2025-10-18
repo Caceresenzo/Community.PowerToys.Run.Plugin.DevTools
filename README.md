@@ -11,6 +11,7 @@ A small developer toolbox for PowerToys Run.
   - [Case Transform](#case-transform)
     - [Example](#example-3)
 - [Develop](#develop)
+- [Release](#release)
 
 # Install
 
@@ -102,3 +103,7 @@ lower <input>
 Run the script [deploy.ps1](./Community.PowerToys.Run.Plugin.DevTools/deploy.ps1).
 
 The logs will be located at: `%LOCALAPPDATA%\Microsoft\PowerToys\PowerToys Run\Logs\DevTools`
+
+# Release
+
+Run the script [pack.ps1](./Community.PowerToys.Run.Plugin.DevTools/pack.ps1).
