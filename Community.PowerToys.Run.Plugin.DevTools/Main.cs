@@ -1,7 +1,6 @@
 using ManagedCommon;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Windows;
 using System.Windows.Input;
 using Wox.Plugin;
@@ -34,6 +33,12 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         private bool Disposed { get; set; }
 
+        private List<IDataGenerator> Generators { get; } = [
+            new HashDataGenerator(),
+            new UuidDataGenerator(),
+            new LoremDataGenerator(),
+        ];
+
         /// <summary>
         /// Return a filtered list, based on the given query.
         /// </summary>
@@ -44,140 +49,66 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             Logger.LogInfo($"Query: `{query.Search}`");
             var parts = query.Search.Split(Wox.Plugin.Query.TermSeparator, 2);
 
-            var commandName = parts[0].ToUpper();
-            var rest = parts.Length > 1 ? parts[1] : string.Empty;
+            var commandName = parts[0].ToLowerInvariant();
+            var arguments = parts.Length > 1 ? parts[1] : string.Empty;
 
-            var hash = TryHash(commandName, rest);
-            if (!string.IsNullOrWhiteSpace(hash))
+            foreach (var generator in Generators)
             {
-                var lowerHash = hash.ToLowerInvariant();
+                var values = generator.GenerateValues(commandName, arguments);
 
-                return
-                [
-                    new Result
+                if (values != null && values.Count > 0)
+                {
+                    return values.ConvertAll(value => new Result
                     {
                         QueryTextDisplay = query.Search,
                         IcoPath = IconPath,
-                        Title = hash,
-                        SubTitle = $"{commandName}({rest}).upper()",
+                        Title = value.Title ?? value.Value,
+                        SubTitle = value.SubTitle,
                         Action = _ =>
                         {
-                            Clipboard.SetDataObject(hash);
+                            Clipboard.SetDataObject(value.Value);
                             return true;
                         },
-                    },
-                    new Result
-                    {
-                        QueryTextDisplay = query.Search,
-                        IcoPath = IconPath,
-                        Title = lowerHash,
-                        SubTitle = $"{commandName}({rest}).lower()",
-                        Action = _ =>
-                        {
-                            Clipboard.SetDataObject(lowerHash);
-                            return true;
-                        },
-                    }
-                ];
+                    });
+                }
             }
 
-            var uuid = TryUuid(commandName);
-            if (!string.IsNullOrWhiteSpace(uuid))
-            {
-                return
-                [
-                    new Result
-                    {
-                        QueryTextDisplay = query.Search,
-                        IcoPath = IconPath,
-                        Title = uuid,
-                        SubTitle = "Version 4: Randomly generated UUID",
-                        Action = _ =>
-                        {
-                            Clipboard.SetDataObject(uuid);
-                            return true;
-                        },
-                    }
-                ];
-            }
-
-            var lorem = TryLorem(commandName);
-            if (!string.IsNullOrWhiteSpace(lorem))
-            {
-                return
-                [
-                    new Result
-                    {
-                        QueryTextDisplay = query.Search,
-                        IcoPath = IconPath,
-                        Title = lorem,
-                        SubTitle = "Single sentence",
-                        Action = _ =>
-                        {
-                            Clipboard.SetDataObject(lorem);
-                            return true;
-                        },
-                    }
-                ];
-            }
-
-            return Recommand(query.ActionKeyword, parts[0]);
+            return Recommand(query.ActionKeyword, commandName);
         }
 
         public List<Result> Recommand(string actionKeyword, string prefix)
         {
             List<Result> results = [];
 
-            foreach (var entry in HashAlgorithms)
+            foreach (var generator in Generators)
             {
-                var algorithmName = entry.Key.ToLowerInvariant();
+                var recommandations = generator.Recommand();
 
-                results.Add(new Result
+                if (recommandations == null || recommandations.Count == 0)
+                {
+                    continue;
+                }
+
+                results.AddRange(recommandations.ConvertAll(recommandation => new Result
                 {
                     IcoPath = IconPath,
-                    Title = $"{algorithmName} - Hash a string with {algorithmName.ToUpperInvariant()}",
-                    SubTitle = $"Example: {algorithmName} <your input>",
-                    QueryTextDisplay = $"{algorithmName} ",
+                    Title = recommandation.Title,
+                    SubTitle = recommandation.SubTitle,
+                    QueryTextDisplay = $"{recommandation.SubCommand} ",
                     Action = _ =>
                     {
-                        Context.API.ChangeQuery($"{actionKeyword} {algorithmName} ");
+                        Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ");
                         return false;
                     },
-                });
+                }));
             }
-
-            results.Add(new Result
-            {
-                IcoPath = IconPath,
-                Title = $"uuid - Generate a random UUID",
-                SubTitle = $"Example: uuid",
-                QueryTextDisplay = $"uuid ",
-                Action = _ =>
-                {
-                    Context.API.ChangeQuery($"{actionKeyword} uuid ");
-                    return false;
-                },
-            });
-
-            results.Add(new Result
-            {
-                IcoPath = IconPath,
-                Title = $"lorem - Get a lorem ipsum text",
-                SubTitle = $"Example: lorem",
-                QueryTextDisplay = $"lorem ",
-                Action = _ =>
-                {
-                    Context.API.ChangeQuery($"{actionKeyword} lorem ");
-                    return false;
-                },
-            });
 
             if (!string.IsNullOrWhiteSpace(prefix))
             {
                 results.RemoveAll(result => !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             }
 
-            results.Sort((x, y) => string.Compare(x.QueryTextDisplay, y.QueryTextDisplay, StringComparison.OrdinalIgnoreCase));
+            results.Sort((x, y) => string.Compare(x.Title, y.Title, StringComparison.OrdinalIgnoreCase));
 
             return results;
         }
@@ -255,56 +186,6 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         private void UpdateIconPath(Theme theme) => IconPath = theme == Theme.Light || theme == Theme.HighContrastWhite ? "Images/devtools.light.png" : "Images/devtools.dark.png";
 
         private void OnThemeChanged(Theme currentTheme, Theme newTheme) => UpdateIconPath(newTheme);
-
-        public static readonly ImmutableDictionary<string, Func<byte[], byte[]>> HashAlgorithms =
-            ImmutableDictionary.CreateRange([
-                KeyValuePair.Create("md5",    (byte[] input) => System.Security.Cryptography.MD5.HashData(input)),
-                KeyValuePair.Create("sha1",   (byte[] input) => System.Security.Cryptography.SHA1.HashData(input)),
-                KeyValuePair.Create("sha256", (byte[] input) => System.Security.Cryptography.SHA256.HashData(input)),
-                KeyValuePair.Create("sha384", (byte[] input) => System.Security.Cryptography.SHA384.HashData(input)),
-                KeyValuePair.Create("sha512", (byte[] input) => System.Security.Cryptography.SHA512.HashData(input)),
-            ]);
-
-        public static string TryHash(string algorithmName, string input)
-        {
-            algorithmName = algorithmName.ToLowerInvariant().Trim();
-
-            if (!HashAlgorithms.ContainsKey(algorithmName))
-            {
-                return null;
-            }
-
-            var algorithm = HashAlgorithms.GetValueOrDefault(algorithmName.ToLowerInvariant());
-
-            var inputBytes = System.Text.Encoding.UTF8.GetBytes(input);
-            var hashBytes = algorithm(inputBytes);
-
-            return Convert.ToHexString(hashBytes);
-        }
-
-        public static string TryUuid(string uuidName)
-        {
-            uuidName = uuidName.ToLowerInvariant().Trim();
-
-            if (uuidName != "uuid")
-            {
-                return null;
-            }
-
-            return Guid.NewGuid().ToString("D");
-        }
-
-        public static string TryLorem(string command)
-        {
-            command = command.ToLowerInvariant().Trim();
-
-            if (command != "lorem")
-            {
-                return null;
-            }
-
-            return "Lorem ipsum dolor sit amet, consectetur adipiscing elit.";
-        }
 
     }
 }
