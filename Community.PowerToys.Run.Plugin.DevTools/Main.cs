@@ -76,10 +76,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 });
             }
 
-            return Recommand(query.ActionKeyword, commandName);
+            var isUsingActionKeyword = !string.IsNullOrWhiteSpace(query.ActionKeyword) && query.RawQuery.StartsWith($"{query.ActionKeyword} ", StringComparison.OrdinalIgnoreCase);
+            return Recommand(query.ActionKeyword, commandName, isUsingActionKeyword);
         }
 
-        public List<Result> Recommand(string actionKeyword, string prefix)
+        public List<Result> Recommand(string actionKeyword, string prefix, bool isUsingActionKeyword)
         {
             List<Result> results = [];
 
@@ -111,7 +112,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 results.RemoveAll(result => !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
             }
 
-            if (results.Count == 0)
+            if (isUsingActionKeyword && results.Count == 0)
             {
                 results.Add(new Result
                 {
