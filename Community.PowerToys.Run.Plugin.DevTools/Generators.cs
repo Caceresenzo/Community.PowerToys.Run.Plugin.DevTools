@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 {
@@ -228,10 +230,14 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         }
     }
 
-    public class CaseDataGenerator : IDataGenerator
+    public partial class CaseDataGenerator : IDataGenerator
     {
         public const string LowerCommandName = "lower";
         public const string UpperCommandName = "upper";
+        public const string CamelCommandName = "camel";
+        public const string PascalCommandName = "pascal";
+        public const string SnakeCommandName = "snake";
+        public const string KebabCommandName = "kebab";
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
@@ -262,6 +268,64 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 ];
             }
 
+            if (commandName == CamelCommandName)
+            {
+                return [
+                    new GeneratedValue
+                    {
+                        Value = ToCamel(arguments),
+                        SubTitle = $"CAMEL({arguments})"
+                    },
+                ];
+            }
+
+            if (commandName == PascalCommandName)
+            {
+                return [
+                    new GeneratedValue
+                    {
+                        Value = ToPascal(arguments),
+                        SubTitle = $"PASCAL({arguments})"
+                    },
+                ];
+            }
+
+            if (commandName == SnakeCommandName)
+            {
+                var snakeCase = ToSnake(arguments);
+
+                return [
+                    new GeneratedValue
+                    {
+                        Value = snakeCase,
+                        SubTitle = $"SNAKE({arguments})"
+                    },
+                    new GeneratedValue
+                    {
+                        Value = snakeCase.ToUpperInvariant(),
+                        SubTitle = $"UPPER_SNAKE({arguments})"
+                    },
+                ];
+            }
+
+            if (commandName == KebabCommandName)
+            {
+                var kebabCase = ToKebab(arguments);
+
+                return [
+                    new GeneratedValue
+                    {
+                        Value = kebabCase,
+                        SubTitle = $"KEBAB({arguments})"
+                    },
+                    new GeneratedValue
+                    {
+                        Value = kebabCase.ToUpperInvariant(),
+                        SubTitle = $"UPPER_KEBAB({arguments})"
+                    },
+                ];
+            }
+
             return null;
         }
 
@@ -272,15 +336,131 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 {
                     SubCommand = LowerCommandName,
                     Title = $"{LowerCommandName} - Lowercase a string",
-                    SubTitle = $"Example: ${LowerCommandName} <input>",
+                    SubTitle = $"Example: {LowerCommandName} <your input>",
                 },
                 new Recommandation
                 {
                     SubCommand = UpperCommandName,
                     Title = $"{UpperCommandName} - Uppercase a string",
-                    SubTitle = $"Example: {UpperCommandName} <input>",
+                    SubTitle = $"Example: {UpperCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = CamelCommandName,
+                    Title = $"{CamelCommandName} - Camel case a string",
+                    SubTitle = $"Example: {CamelCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = PascalCommandName,
+                    Title = $"{PascalCommandName} - Pascal case a string",
+                    SubTitle = $"Example: {PascalCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = SnakeCommandName,
+                    Title = $"{SnakeCommandName} - Snake case a string",
+                    SubTitle = $"Example: {SnakeCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = KebabCommandName,
+                    Title = $"{KebabCommandName} - Kebab case a string",
+                    SubTitle = $"Example: {KebabCommandName} <your input>",
                 }
             ];
+        }
+
+        /// <summary>
+        /// From: https://stackoverflow.com/a/22487076/7292958
+        /// </summary>
+        public static string SplitOnCaps(string input)
+        {
+            var splits = new List<int>();
+            var characters = input.ToCharArray();
+
+            for (var index = 1; index < characters.Length - 1; index++)
+            {
+                if (IsUpperCase(characters[index]) && !IsUpperCase(characters[index + 1]) ||
+                   IsUpperCase(characters[index]) && !IsUpperCase(characters[index - 1]))
+                {
+                    splits.Add(index);
+                }
+            }
+
+            var builder = new StringBuilder();
+
+            var lastSplit = 0;
+            foreach (var split in splits)
+            {
+                builder.Append(input.Substring(lastSplit, split - lastSplit) + " ");
+                lastSplit = split;
+            }
+
+            builder.Append(input.Substring(lastSplit));
+
+            return builder.ToString();
+        }
+
+        public static bool IsUpperCase(char character)
+        {
+            return char.IsUpper(character);
+        }
+
+        [GeneratedRegex(@"[^A-Za-z0-9]")]
+        private static partial Regex OnlyLettersAndNumbersRegex();
+
+        public static string Chunk(string input, Func<string, string> selector, string separator)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+            {
+                return string.Empty;
+            }
+
+            return string.Join(
+                separator,
+                SplitOnCaps(OnlyLettersAndNumbersRegex().Replace(input, " "))
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                    .Select(selector)
+            );
+        }
+
+        public static string ToPascal(string input)
+        {
+            return Chunk(
+                input,
+                part => char.ToUpperInvariant(part[0]) + part[1..].ToLowerInvariant(),
+                string.Empty
+            );
+        }
+
+        public static string ToCamel(string input)
+        {
+            var pascalCase = ToPascal(input);
+            if (string.IsNullOrEmpty(pascalCase))
+            {
+                return string.Empty;
+            }
+
+            return char.ToLowerInvariant(pascalCase[0]) + pascalCase[1..];
+        }
+
+        public static string ToSnake(string input)
+        {
+            return Chunk(
+                input,
+                part => part.ToLowerInvariant(),
+                "_"
+            );
+        }
+
+        public static string ToKebab(string input)
+        {
+            return Chunk(
+                input,
+                part => part.ToLowerInvariant(),
+                "-"
+            );
         }
     }
 
