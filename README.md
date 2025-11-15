@@ -84,6 +84,10 @@ Uppercase or lowercase a message.
 ```
 upper <input>
 lower <input>
+camel <input>
+pascal <input>
+snake <input>
+kebab <input>
 ```
 
 ### Example
@@ -96,6 +100,28 @@ lower <input>
 ```
 > lower Hello
 < hello
+```
+
+```
+> camel Hello World
+< helloWorld
+```
+
+```
+> pascal hello World
+< HelloWorld
+```
+
+```
+> snake Hello World
+< hello_world
+< HELLO_WORLD
+```
+
+```
+> kebab Hello World
+< hello-world
+< HELLO-WORLD
 ```
 
 # Develop
