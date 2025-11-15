@@ -101,7 +101,15 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     QueryTextDisplay = $"{recommandation.SubCommand} ",
                     Action = _ =>
                     {
-                        Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ", true);
+                        if (isUsingActionKeyword)
+                        {
+                            Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ", true);
+                        }
+                        else
+                        {
+                            Context.API.ChangeQuery($"{recommandation.SubCommand} ", true);
+                        }
+
                         return false;
                     },
                 }));
