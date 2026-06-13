@@ -261,6 +261,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         public const string PascalCommandName = "pascal";
         public const string SnakeCommandName = "snake";
         public const string KebabCommandName = "kebab";
+        public const string SpaceCommandName = "space";
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
@@ -302,6 +303,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                         Value = ToCamel(arguments),
                         SubTitle = $"CAMEL({arguments})",
                     },
+                    new GeneratedValue
+                    {
+                        Value = ToCamel(arguments, " "),
+                        SubTitle = $"SPACE_CAMEL({arguments})",
+                    },
                 ];
             }
 
@@ -313,6 +319,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     {
                         Value = ToPascal(arguments),
                         SubTitle = $"PASCAL({arguments})",
+                    },
+                    new GeneratedValue
+                    {
+                        Value = ToPascal(arguments, " "),
+                        SubTitle = $"SPACE_PASCAL({arguments})",
                     },
                 ];
             }
@@ -343,6 +354,26 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     {
                         Value = kebabCase.ToUpperInvariant(),
                         SubTitle = $"UPPER_KEBAB({arguments})",
+                    },
+                ];
+            }
+
+            if (commandName == SpaceCommandName)
+            {
+                var spaceCase = ToSpace(arguments);
+
+                return
+                [
+                    new GeneratedValue { Value = spaceCase, SubTitle = $"SPACE({arguments})" },
+                    new GeneratedValue
+                    {
+                        Value = spaceCase.ToLowerInvariant(),
+                        SubTitle = $"LOWER_SPACE({arguments})",
+                    },
+                    new GeneratedValue
+                    {
+                        Value = spaceCase.ToUpperInvariant(),
+                        SubTitle = $"UPPER_SPACE({arguments})",
                     },
                 ];
             }
@@ -389,6 +420,12 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     SubCommand = KebabCommandName,
                     Title = $"{KebabCommandName} - Kebab case a string",
                     SubTitle = $"Example: {KebabCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = SpaceCommandName,
+                    Title = $"{SpaceCommandName} - Space a string",
+                    SubTitle = $"Example: {SpaceCommandName} <your input>",
                 },
             ];
         }
@@ -449,18 +486,18 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             );
         }
 
-        public static string ToPascal(string input)
+        public static string ToPascal(string input, string separator = "")
         {
             return Chunk(
                 input,
                 part => char.ToUpperInvariant(part[0]) + part[1..].ToLowerInvariant(),
-                string.Empty
+                separator
             );
         }
 
-        public static string ToCamel(string input)
+        public static string ToCamel(string input, string separator = "")
         {
-            var pascalCase = ToPascal(input);
+            var pascalCase = ToPascal(input, separator);
             if (string.IsNullOrEmpty(pascalCase))
             {
                 return string.Empty;
@@ -477,6 +514,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         public static string ToKebab(string input)
         {
             return Chunk(input, part => part.ToLowerInvariant(), "-");
+        }
+
+        public static string ToSpace(string input)
+        {
+            return Chunk(input, part => part, " ");
         }
     }
 }

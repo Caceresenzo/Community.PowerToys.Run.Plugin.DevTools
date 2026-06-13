@@ -88,6 +88,7 @@ camel <input>
 pascal <input>
 snake <input>
 kebab <input>
+space <input>
 ```
 
 ### Example
@@ -105,11 +106,13 @@ kebab <input>
 ```
 > camel Hello World
 < helloWorld
+< hello World
 ```
 
 ```
 > pascal hello World
 < HelloWorld
+< Hello World
 ```
 
 ```
@@ -122,6 +125,13 @@ kebab <input>
 > kebab Hello World
 < hello-world
 < HELLO-WORLD
+```
+
+```
+> space Hello_World
+< Hello World
+< hello world
+< HELLO WORLD
 ```
 
 # Develop
