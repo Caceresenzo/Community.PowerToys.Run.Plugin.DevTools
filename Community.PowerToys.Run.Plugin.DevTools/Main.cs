@@ -1,8 +1,8 @@
-using ManagedCommon;
 using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Input;
+using ManagedCommon;
 using Wox.Plugin;
 
 namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
@@ -33,7 +33,8 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         private bool Disposed { get; set; }
 
-        private List<IDataGenerator> Generators { get; } = [
+        private List<IDataGenerator> Generators { get; } =
+        [
             new HashDataGenerator(),
             new UuidDataGenerator(),
             new LoremDataGenerator(),
@@ -76,11 +77,20 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 });
             }
 
-            var isUsingActionKeyword = !string.IsNullOrWhiteSpace(query.ActionKeyword) && query.RawQuery.StartsWith($"{query.ActionKeyword} ", StringComparison.OrdinalIgnoreCase);
+            var isUsingActionKeyword =
+                !string.IsNullOrWhiteSpace(query.ActionKeyword)
+                && query.RawQuery.StartsWith(
+                    $"{query.ActionKeyword} ",
+                    StringComparison.OrdinalIgnoreCase
+                );
             return Recommand(query.ActionKeyword, commandName, isUsingActionKeyword);
         }
 
-        public List<Result> Recommand(string actionKeyword, string prefix, bool isUsingActionKeyword)
+        public List<Result> Recommand(
+            string actionKeyword,
+            string prefix,
+            bool isUsingActionKeyword
+        )
         {
             List<Result> results = [];
 
@@ -93,50 +103,61 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     continue;
                 }
 
-                results.AddRange(recommandations.ConvertAll(recommandation => new Result
-                {
-                    IcoPath = IconPath,
-                    Title = recommandation.Title,
-                    SubTitle = recommandation.SubTitle,
-                    QueryTextDisplay = $"{recommandation.SubCommand} ",
-                    Action = _ =>
+                results.AddRange(
+                    recommandations.ConvertAll(recommandation => new Result
                     {
-                        if (isUsingActionKeyword)
+                        IcoPath = IconPath,
+                        Title = recommandation.Title,
+                        SubTitle = recommandation.SubTitle,
+                        QueryTextDisplay = $"{recommandation.SubCommand} ",
+                        Action = _ =>
                         {
-                            Context.API.ChangeQuery($"{actionKeyword} {recommandation.SubCommand} ", true);
-                        }
-                        else
-                        {
-                            Context.API.ChangeQuery($"{recommandation.SubCommand} ", true);
-                        }
+                            if (isUsingActionKeyword)
+                            {
+                                Context.API.ChangeQuery(
+                                    $"{actionKeyword} {recommandation.SubCommand} ",
+                                    true
+                                );
+                            }
+                            else
+                            {
+                                Context.API.ChangeQuery($"{recommandation.SubCommand} ", true);
+                            }
 
-                        return false;
-                    },
-                }));
+                            return false;
+                        },
+                    })
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(prefix))
             {
-                results.RemoveAll(result => !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase));
+                results.RemoveAll(result =>
+                    !result.QueryTextDisplay.StartsWith(prefix, StringComparison.OrdinalIgnoreCase)
+                );
             }
 
             if (isUsingActionKeyword && results.Count == 0)
             {
-                results.Add(new Result
-                {
-                    IcoPath = IconPath,
-                    Title = $"No command starts with: {prefix}",
-                    SubTitle = "Press the Enter key to return to the command list",
-                    Action = _ =>
+                results.Add(
+                    new Result
                     {
-                        Context.API.ChangeQuery($"{actionKeyword} ", true);
-                        return false;
-                    },
-                });
+                        IcoPath = IconPath,
+                        Title = $"No command starts with: {prefix}",
+                        SubTitle = "Press the Enter key to return to the command list",
+                        Action = _ =>
+                        {
+                            Context.API.ChangeQuery($"{actionKeyword} ", true);
+                            return false;
+                        },
+                    }
+                );
             }
             else
             {
-                results.Sort((x, y) => string.Compare(x.Title, y.Title, StringComparison.OrdinalIgnoreCase));
+                results.Sort(
+                    (x, y) => string.Compare(x.Title, y.Title, StringComparison.OrdinalIgnoreCase)
+                );
             }
 
             return results;
@@ -179,7 +200,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                             Clipboard.SetDataObject(search);
                             return true;
                         },
-                    }
+                    },
                 ];
             }
 
@@ -212,9 +233,12 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             Disposed = true;
         }
 
-        private void UpdateIconPath(Theme theme) => IconPath = theme == Theme.Light || theme == Theme.HighContrastWhite ? "Images/devtools.light.png" : "Images/devtools.dark.png";
+        private void UpdateIconPath(Theme theme) =>
+            IconPath =
+                theme == Theme.Light || theme == Theme.HighContrastWhite
+                    ? "Images/devtools.light.png"
+                    : "Images/devtools.dark.png";
 
         private void OnThemeChanged(Theme currentTheme, Theme newTheme) => UpdateIconPath(newTheme);
-
     }
 }

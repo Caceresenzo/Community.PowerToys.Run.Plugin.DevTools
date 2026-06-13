@@ -33,8 +33,8 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
     {
         public static readonly ImmutableDictionary<string, Func<byte[], byte[]>> HashAlgorithms =
             ImmutableDictionary.CreateRange([
-                KeyValuePair.Create("md5",    (byte[] input) => MD5.HashData(input)),
-                KeyValuePair.Create("sha1",   (byte[] input) => SHA1.HashData(input)),
+                KeyValuePair.Create("md5", (byte[] input) => MD5.HashData(input)),
+                KeyValuePair.Create("sha1", (byte[] input) => SHA1.HashData(input)),
                 KeyValuePair.Create("sha256", (byte[] input) => SHA256.HashData(input)),
                 KeyValuePair.Create("sha384", (byte[] input) => SHA384.HashData(input)),
                 KeyValuePair.Create("sha512", (byte[] input) => SHA512.HashData(input)),
@@ -55,17 +55,14 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             var hashString = Convert.ToHexString(hashBytes);
             var lowerHashString = hashString.ToLowerInvariant();
 
-            return [
-                new GeneratedValue
-                {
-                    Value = hashString,
-                    SubTitle = $"{commandName}({arguments})",
-                },
+            return
+            [
+                new GeneratedValue { Value = hashString, SubTitle = $"{commandName}({arguments})" },
                 new GeneratedValue
                 {
                     Value = lowerHashString,
                     SubTitle = $"{commandName}({arguments})",
-                }
+                },
             ];
         }
 
@@ -77,12 +74,15 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             {
                 var algorithmName = entry.Key.ToLowerInvariant();
 
-                recommandations.Add(new Recommandation
-                {
-                    SubCommand = algorithmName,
-                    Title = $"{algorithmName} - Hash a string with {algorithmName.ToUpperInvariant()}",
-                    SubTitle = $"Example: {algorithmName} <your input>",
-                });
+                recommandations.Add(
+                    new Recommandation
+                    {
+                        SubCommand = algorithmName,
+                        Title =
+                            $"{algorithmName} - Hash a string with {algorithmName.ToUpperInvariant()}",
+                        SubTitle = $"Example: {algorithmName} <your input>",
+                    }
+                );
             }
 
             return recommandations;
@@ -98,7 +98,8 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 return null;
             }
 
-            return [
+            return
+            [
                 new GeneratedValue
                 {
                     Value = Guid.NewGuid().ToString("D"),
@@ -109,25 +110,45 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<Recommandation> Recommand()
         {
-            return [
+            return
+            [
                 new Recommandation
                 {
                     SubCommand = "uuid",
                     Title = "uuid - Generate a random UUID",
                     SubTitle = "Example: uuid",
-                }
+                },
             ];
         }
     }
 
     public class LoremDataGenerator : IDataGenerator
     {
-        private static readonly string FirstSentence = "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
+        private static readonly string FirstSentence =
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
 
-        private static readonly string[] Words = [
-            "lorem", "ipsum", "dolor", "sit", "amet", "consectetuer",
-            "adipiscing", "elit", "sed", "diam", "nonummy", "nibh", "euismod",
-            "tincidunt", "ut", "laoreet", "dolore", "magna", "aliquam", "erat"
+        private static readonly string[] Words =
+        [
+            "lorem",
+            "ipsum",
+            "dolor",
+            "sit",
+            "amet",
+            "consectetuer",
+            "adipiscing",
+            "elit",
+            "sed",
+            "diam",
+            "nonummy",
+            "nibh",
+            "euismod",
+            "tincidunt",
+            "ut",
+            "laoreet",
+            "dolore",
+            "magna",
+            "aliquam",
+            "erat",
         ];
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
@@ -154,24 +175,25 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             var wordRepeatCount = Math.Min(repeatCount, 10000);
             var wordsString = Generate(random, wordRepeatCount);
 
-            return [
+            return
+            [
                 new GeneratedValue
                 {
                     Value = sentencesString,
                     Title = $"{sentenceRepeatCount} sentence(s), include the first sentence",
-                    SubTitle = $"{sentencesString.Length} character(s)"
+                    SubTitle = $"{sentencesString.Length} character(s)",
                 },
                 new GeneratedValue
                 {
                     Value = paragraphsString,
                     Title = $"{paragraphRepeatCount} paragraph(s), include the first sentence",
-                    SubTitle = $"{paragraphsString.Length} character(s)"
+                    SubTitle = $"{paragraphsString.Length} character(s)",
                 },
                 new GeneratedValue
                 {
                     Value = wordsString,
                     Title = $"{wordRepeatCount} words(s), fully random",
-                    SubTitle = $"{wordsString.Length} character(s)"
+                    SubTitle = $"{wordsString.Length} character(s)",
                 },
             ];
         }
@@ -219,13 +241,14 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<Recommandation> Recommand()
         {
-            return [
+            return
+            [
                 new Recommandation
                 {
                     SubCommand = "lorem",
                     Title = "lorem - Generate a lorem ipsum text",
                     SubTitle = "Example: lorem [<number of repeat>]",
-                }
+                },
             ];
         }
     }
@@ -248,44 +271,48 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
             if (commandName == LowerCommandName)
             {
-                return [
+                return
+                [
                     new GeneratedValue
                     {
                         Value = arguments.ToLowerInvariant(),
-                        SubTitle = $"LOWER({arguments})"
+                        SubTitle = $"LOWER({arguments})",
                     },
                 ];
             }
 
             if (commandName == UpperCommandName)
             {
-                return [
+                return
+                [
                     new GeneratedValue
                     {
                         Value = arguments.ToUpperInvariant(),
-                        SubTitle = $"UPPER({arguments})"
+                        SubTitle = $"UPPER({arguments})",
                     },
                 ];
             }
 
             if (commandName == CamelCommandName)
             {
-                return [
+                return
+                [
                     new GeneratedValue
                     {
                         Value = ToCamel(arguments),
-                        SubTitle = $"CAMEL({arguments})"
+                        SubTitle = $"CAMEL({arguments})",
                     },
                 ];
             }
 
             if (commandName == PascalCommandName)
             {
-                return [
+                return
+                [
                     new GeneratedValue
                     {
                         Value = ToPascal(arguments),
-                        SubTitle = $"PASCAL({arguments})"
+                        SubTitle = $"PASCAL({arguments})",
                     },
                 ];
             }
@@ -294,16 +321,13 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             {
                 var snakeCase = ToSnake(arguments);
 
-                return [
-                    new GeneratedValue
-                    {
-                        Value = snakeCase,
-                        SubTitle = $"SNAKE({arguments})"
-                    },
+                return
+                [
+                    new GeneratedValue { Value = snakeCase, SubTitle = $"SNAKE({arguments})" },
                     new GeneratedValue
                     {
                         Value = snakeCase.ToUpperInvariant(),
-                        SubTitle = $"UPPER_SNAKE({arguments})"
+                        SubTitle = $"UPPER_SNAKE({arguments})",
                     },
                 ];
             }
@@ -312,16 +336,13 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             {
                 var kebabCase = ToKebab(arguments);
 
-                return [
-                    new GeneratedValue
-                    {
-                        Value = kebabCase,
-                        SubTitle = $"KEBAB({arguments})"
-                    },
+                return
+                [
+                    new GeneratedValue { Value = kebabCase, SubTitle = $"KEBAB({arguments})" },
                     new GeneratedValue
                     {
                         Value = kebabCase.ToUpperInvariant(),
-                        SubTitle = $"UPPER_KEBAB({arguments})"
+                        SubTitle = $"UPPER_KEBAB({arguments})",
                     },
                 ];
             }
@@ -331,7 +352,8 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<Recommandation> Recommand()
         {
-            return [
+            return
+            [
                 new Recommandation
                 {
                     SubCommand = LowerCommandName,
@@ -367,7 +389,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     SubCommand = KebabCommandName,
                     Title = $"{KebabCommandName} - Kebab case a string",
                     SubTitle = $"Example: {KebabCommandName} <your input>",
-                }
+                },
             ];
         }
 
@@ -381,8 +403,10 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
             for (var index = 1; index < characters.Length - 1; index++)
             {
-                if (IsUpperCase(characters[index]) && !IsUpperCase(characters[index + 1]) ||
-                   IsUpperCase(characters[index]) && !IsUpperCase(characters[index - 1]))
+                if (
+                    IsUpperCase(characters[index]) && !IsUpperCase(characters[index + 1])
+                    || IsUpperCase(characters[index]) && !IsUpperCase(characters[index - 1])
+                )
                 {
                     splits.Add(index);
                 }
@@ -447,21 +471,12 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public static string ToSnake(string input)
         {
-            return Chunk(
-                input,
-                part => part.ToLowerInvariant(),
-                "_"
-            );
+            return Chunk(input, part => part.ToLowerInvariant(), "_");
         }
 
         public static string ToKebab(string input)
         {
-            return Chunk(
-                input,
-                part => part.ToLowerInvariant(),
-                "-"
-            );
+            return Chunk(input, part => part.ToLowerInvariant(), "-");
         }
     }
-
 }
