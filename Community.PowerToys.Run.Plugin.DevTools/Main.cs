@@ -49,6 +49,16 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         /// <returns>A filtered list, can be empty when nothing was found.</returns>
         public List<Result> Query(Query query)
         {
+            var isUsingActionKeyword =
+                !string.IsNullOrWhiteSpace(query.ActionKeyword)
+                && (
+                    query.RawQuery == query.ActionKeyword
+                    || query.RawQuery.StartsWith(
+                        $"{query.ActionKeyword} ",
+                        StringComparison.OrdinalIgnoreCase
+                    )
+                );
+
             Logger.LogInfo($"Query: `{query.Search}`");
             var parts = query.Search.Split(Wox.Plugin.Query.TermSeparator, 2);
 
@@ -64,8 +74,9 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                     continue;
                 }
 
-                return values.ConvertAll(value => new Result
+                var results = values.ConvertAll(value => new Result
                 {
+                    DisableUsageBasedScoring = true,
                     QueryTextDisplay = query.Search,
                     IcoPath = IconPath,
                     Title = value.Title ?? value.Value,
@@ -76,17 +87,25 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                         return true;
                     },
                 });
-            }
 
-            var isUsingActionKeyword =
-                !string.IsNullOrWhiteSpace(query.ActionKeyword)
-                && (
-                    query.RawQuery == query.ActionKeyword
-                    || query.RawQuery.StartsWith(
-                        $"{query.ActionKeyword} ",
-                        StringComparison.OrdinalIgnoreCase
-                    )
+                results.Add(
+                    new Result
+                    {
+                        DisableUsageBasedScoring = true,
+                        QueryTextDisplay = query.Search,
+                        IcoPath = IconPath,
+                        Title = $"Reset input",
+                        SubTitle = $"Go back to just `{commandName}`",
+                        Action = _ =>
+                        {
+                            ChangeQuery(query.ActionKeyword, commandName, isUsingActionKeyword);
+                            return false;
+                        },
+                    }
                 );
+
+                return results;
+            }
 
             return Recommand(query.ActionKeyword, commandName, isUsingActionKeyword);
         }
@@ -116,18 +135,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                         QueryTextDisplay = $"{recommandation.SubCommand} ",
                         Action = _ =>
                         {
-                            if (isUsingActionKeyword)
-                            {
-                                Context.API.ChangeQuery(
-                                    $"{actionKeyword} {recommandation.SubCommand} ",
-                                    true
-                                );
-                            }
-                            else
-                            {
-                                Context.API.ChangeQuery($"{recommandation.SubCommand} ", true);
-                            }
-
+                            ChangeQuery(
+                                actionKeyword,
+                                recommandation.SubCommand,
+                                isUsingActionKeyword
+                            );
                             return false;
                         },
                     })
@@ -165,6 +177,18 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             }
 
             return results;
+        }
+
+        private void ChangeQuery(string actionKeyword, string subCommand, bool isUsingActionKeyword)
+        {
+            if (isUsingActionKeyword)
+            {
+                Context.API.ChangeQuery($"{actionKeyword} {subCommand} ", true);
+            }
+            else
+            {
+                Context.API.ChangeQuery($"{subCommand} ", true);
+            }
         }
 
         /// <summary>
