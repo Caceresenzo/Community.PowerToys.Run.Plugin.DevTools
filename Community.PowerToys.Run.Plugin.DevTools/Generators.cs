@@ -523,4 +523,58 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             return Chunk(input, part => part, " ");
         }
     }
+
+    public class UrlDataGenerator : IDataGenerator
+    {
+        public const string EncodeCommandName = "urlencode";
+        public const string DecodeCommandName = "urldecode";
+
+        public List<GeneratedValue> GenerateValues(string commandName, string arguments)
+        {
+            if (commandName == EncodeCommandName)
+            {
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = Uri.EscapeDataString(arguments),
+                        SubTitle = $"URL_ENCODE({arguments})",
+                    },
+                ];
+            }
+
+            if (commandName == DecodeCommandName)
+            {
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = Uri.UnescapeDataString(arguments),
+                        SubTitle = $"URL_DECODE({arguments})",
+                    },
+                ];
+            }
+
+            return null;
+        }
+
+        public List<Recommandation> Recommand()
+        {
+            return
+            [
+                new Recommandation
+                {
+                    SubCommand = EncodeCommandName,
+                    Title = $"{EncodeCommandName} - URL Encode a string",
+                    SubTitle = $"Example: {EncodeCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = DecodeCommandName,
+                    Title = $"{DecodeCommandName} - URL Decode a string",
+                    SubTitle = $"Example: {DecodeCommandName} <your input>",
+                },
+            ];
+        }
+    }
 }

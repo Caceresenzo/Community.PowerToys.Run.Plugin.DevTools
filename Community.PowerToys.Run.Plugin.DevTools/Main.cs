@@ -39,6 +39,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             new UuidDataGenerator(),
             new LoremDataGenerator(),
             new CaseDataGenerator(),
+            new UrlDataGenerator(),
         ];
 
         /// <summary>
