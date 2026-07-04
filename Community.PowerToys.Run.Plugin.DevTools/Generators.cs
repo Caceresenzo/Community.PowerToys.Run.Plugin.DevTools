@@ -468,7 +468,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             return char.IsUpper(character);
         }
 
-        [GeneratedRegex(@"[^A-Za-z0-9]")]
+        [GeneratedRegex(@"[^\p{L}\p{N}]")]
         private static partial Regex OnlyLettersAndNumbersRegex();
 
         public static string Chunk(string input, Func<string, string> selector, string separator)
