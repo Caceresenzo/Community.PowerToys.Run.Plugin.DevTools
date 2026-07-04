@@ -80,10 +80,14 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
             var isUsingActionKeyword =
                 !string.IsNullOrWhiteSpace(query.ActionKeyword)
-                && query.RawQuery.StartsWith(
-                    $"{query.ActionKeyword} ",
-                    StringComparison.OrdinalIgnoreCase
+                && (
+                    query.RawQuery == query.ActionKeyword
+                    || query.RawQuery.StartsWith(
+                        $"{query.ActionKeyword} ",
+                        StringComparison.OrdinalIgnoreCase
+                    )
                 );
+
             return Recommand(query.ActionKeyword, commandName, isUsingActionKeyword);
         }
 
@@ -98,7 +102,6 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             foreach (var generator in Generators)
             {
                 var recommandations = generator.Recommand();
-
                 if (recommandations == null || recommandations.Count == 0)
                 {
                     continue;
