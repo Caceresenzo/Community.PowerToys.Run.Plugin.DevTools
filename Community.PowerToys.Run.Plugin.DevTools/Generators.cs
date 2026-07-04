@@ -430,20 +430,18 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             ];
         }
 
-        /// <summary>
-        /// From: https://stackoverflow.com/a/22487076/7292958
-        /// </summary>
         public static string SplitOnCaps(string input)
         {
             var splits = new List<int>();
             var characters = input.ToCharArray();
 
-            for (var index = 1; index < characters.Length - 1; index++)
+            for (var index = 1; index < characters.Length; index++)
             {
-                if (
-                    IsUpperCase(characters[index]) && !IsUpperCase(characters[index + 1])
-                    || IsUpperCase(characters[index]) && !IsUpperCase(characters[index - 1])
-                )
+                var previousIsLower = !IsUpperCase(characters[index - 1]);
+                var nextIsLower =
+                    index + 1 >= characters.Length || !IsUpperCase(characters[index + 1]);
+
+                if (IsUpperCase(characters[index]) && (nextIsLower || previousIsLower))
                 {
                     splits.Add(index);
                 }
