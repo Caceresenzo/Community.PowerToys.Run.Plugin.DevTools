@@ -91,9 +91,11 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
     public class UuidDataGenerator : IDataGenerator
     {
+        public const string UuidCommandName = "uuid";
+
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
-            if (commandName != "uuid")
+            if (commandName != UuidCommandName)
             {
                 return null;
             }
@@ -114,9 +116,9 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             [
                 new Recommandation
                 {
-                    SubCommand = "uuid",
-                    Title = "uuid - Generate a random UUID",
-                    SubTitle = "Example: uuid",
+                    SubCommand = UuidCommandName,
+                    Title = $"{UuidCommandName} - Generate a random UUID",
+                    SubTitle = $"Example: {UuidCommandName}",
                 },
             ];
         }
@@ -124,6 +126,8 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
     public class LoremDataGenerator : IDataGenerator
     {
+        public const string LoremCommandName = "lorem";
+
         private static readonly string FirstSentence =
             "Lorem ipsum dolor sit amet, consectetur adipiscing elit";
 
@@ -153,7 +157,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
-            if (commandName != "lorem")
+            if (commandName != LoremCommandName)
             {
                 return null;
             }
@@ -245,9 +249,9 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             [
                 new Recommandation
                 {
-                    SubCommand = "lorem",
-                    Title = "lorem - Generate a lorem ipsum text",
-                    SubTitle = "Example: lorem [<number of repeat>]",
+                    SubCommand = LoremCommandName,
+                    Title = $"{LoremCommandName} - Generate a lorem ipsum text",
+                    SubTitle = $"Example: {LoremCommandName} [<number of repeat>]",
                 },
             ];
         }
