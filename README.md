@@ -10,6 +10,8 @@ A small developer toolbox for PowerToys Run.
     - [Example](#example-2)
   - [Case Transform](#case-transform)
     - [Example](#example-3)
+  - [URL Encoding](#url-encoding)
+    - [Example](#example-4)
 - [Develop](#develop)
 - [Release](#release)
 
@@ -132,6 +134,27 @@ space <input>
 < Hello World
 < hello world
 < HELLO WORLD
+```
+
+## URL Encoding
+
+Encode or decode a string for use in a URL.
+
+```
+urlencode <input>
+urldecode <input>
+```
+
+### Example
+
+```
+> urlencode Hello/World
+< Hello%2FWorld
+```
+
+```
+> urldecode Hello%2FWorld
+< Hello/World
 ```
 
 # Develop
