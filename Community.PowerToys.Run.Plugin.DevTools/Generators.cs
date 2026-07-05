@@ -577,4 +577,59 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             ];
         }
     }
+
+    public class SlashDataGenerator : IDataGenerator
+    {
+        public const string ShortWindowCommandName = "winslash";
+        public const string WindowCommandName = "windowsslash";
+        public const string UnixCommandName = "unixslash";
+
+        public List<GeneratedValue> GenerateValues(string commandName, string arguments)
+        {
+            if (commandName == ShortWindowCommandName || commandName == WindowCommandName)
+            {
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = arguments.Replace("/", "\\"),
+                        SubTitle = $"WIN_SLASH({arguments})",
+                    },
+                ];
+            }
+
+            if (commandName == UnixCommandName)
+            {
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = arguments.Replace("\\", "/"),
+                        SubTitle = $"UNIX_SLASH({arguments})",
+                    },
+                ];
+            }
+
+            return null;
+        }
+
+        public List<Recommandation> Recommand()
+        {
+            return
+            [
+                new Recommandation
+                {
+                    SubCommand = ShortWindowCommandName,
+                    Title = $"{ShortWindowCommandName} - Convert slashes to Windows separator",
+                    SubTitle = $"Example: {ShortWindowCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = UnixCommandName,
+                    Title = $"{UnixCommandName} - Convert slashes to Unix separator",
+                    SubTitle = $"Example: {UnixCommandName} <your input>",
+                },
+            ];
+        }
+    }
 }

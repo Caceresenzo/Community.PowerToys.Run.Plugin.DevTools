@@ -40,6 +40,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
             new LoremDataGenerator(),
             new CaseDataGenerator(),
             new UrlDataGenerator(),
+            new SlashDataGenerator(),
         ];
 
         /// <summary>

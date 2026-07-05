@@ -12,6 +12,8 @@ A small developer toolbox for PowerToys Run.
     - [Example](#example-3)
   - [URL Encoding](#url-encoding)
     - [Example](#example-4)
+  - [Slash Conversion](#slash-conversion)
+    - [Example](#example-5)
 - [Develop](#develop)
 - [Release](#release)
 
@@ -154,6 +156,27 @@ urldecode <input>
 
 ```
 > urldecode Hello%2FWorld
+< Hello/World
+```
+
+## Slash Conversion
+
+Replace slash to either Window or Unix separators.
+
+```
+winslash <input>
+unixslash <input>
+```
+
+### Example
+
+```
+> winslash Hello/World
+< Hello\World
+```
+
+```
+> unixslash Hello\World
 < Hello/World
 ```
 
