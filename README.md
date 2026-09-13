@@ -14,6 +14,8 @@ A small developer toolbox for PowerToys Run.
     - [Example](#example-4)
   - [Slash Conversion](#slash-conversion)
     - [Example](#example-5)
+  - [Base64 Conversion](#base64-conversion)
+    - [Example](#example-6)
 - [Develop](#develop)
 - [Release](#release)
 
@@ -143,19 +145,19 @@ space <input>
 Encode or decode a string for use in a URL.
 
 ```
-urlencode <input>
-urldecode <input>
+urle <input>
+urld <input>
 ```
 
 ### Example
 
 ```
-> urlencode Hello/World
+> urle Hello/World
 < Hello%2FWorld
 ```
 
 ```
-> urldecode Hello%2FWorld
+> urld Hello%2FWorld
 < Hello/World
 ```
 
@@ -164,20 +166,45 @@ urldecode <input>
 Replace slash to either Window or Unix separators.
 
 ```
-winslash <input>
-unixslash <input>
+slash <input>
 ```
 
 ### Example
 
 ```
-> winslash Hello/World
+> slash Hello/World
+< Hello/World
 < Hello\World
 ```
 
 ```
-> unixslash Hello\World
+> slash Hello\World
 < Hello/World
+< Hello\World
+```
+
+## Base64 Conversion
+
+Encode or decode a string in Base64.
+
+```
+base64e <input>
+base64d <input>
+```
+
+### Example
+
+```
+> base64e Hello World
+< SGVsbG8gV29ybGQ=
+< SGVsbG8gV29ybGQ
+```
+
+```
+> base64d SGVsbG8gV29ybGQ=
+< Hello World
+> base64d SGVsbG8gV29ybGQ
+< Hello World
 ```
 
 # Develop
