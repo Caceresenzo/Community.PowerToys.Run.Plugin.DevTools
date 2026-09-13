@@ -578,6 +578,82 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
         }
     }
 
+    public class Base64DataGenerator : IDataGenerator
+    {
+        public const string ShortEncodeCommandName = "base64e";
+        public const string EncodeCommandName = "base64encode";
+        public const string ShortDecodeCommandName = "base64d";
+        public const string DecodeCommandName = "base64decode";
+
+        public List<GeneratedValue> GenerateValues(string commandName, string arguments)
+        {
+            if (commandName == EncodeCommandName || commandName == ShortEncodeCommandName)
+            {
+                var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(arguments));
+                var encodedUrlSafe = encoded.TrimEnd('=').Replace('+', '-').Replace('/', '_');
+
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = encoded,
+                        SubTitle = $"BASE64_ENCODE({arguments})",
+                    },
+                    new GeneratedValue
+                    {
+                        Value = encodedUrlSafe,
+                        SubTitle = $"URL_SAFE_BASE64_ENCODE({arguments})",
+                    },
+                ];
+            }
+
+            if (commandName == DecodeCommandName || commandName == ShortDecodeCommandName)
+            {
+                arguments = arguments
+                    .Replace('-', '+')
+                    .Replace('_', '/')
+                    .PadRight(arguments.Length + (4 - arguments.Length % 4) % 4, '=');
+
+                var decoded = "(invalid base64 input)";
+                try
+                {
+                    decoded = Encoding.UTF8.GetString(Convert.FromBase64String(arguments));
+                }
+                catch (FormatException) { }
+
+                return
+                [
+                    new GeneratedValue
+                    {
+                        Value = decoded,
+                        SubTitle = $"BASE64_DECODE({arguments})",
+                    },
+                ];
+            }
+
+            return null;
+        }
+
+        public List<Recommandation> Recommand()
+        {
+            return
+            [
+                new Recommandation
+                {
+                    SubCommand = EncodeCommandName,
+                    Title = $"{EncodeCommandName} - Encode a string to Base64",
+                    SubTitle = $"Example: {EncodeCommandName} <your input>",
+                },
+                new Recommandation
+                {
+                    SubCommand = DecodeCommandName,
+                    Title = $"{DecodeCommandName} - Decode a string from Base64",
+                    SubTitle = $"Example: {DecodeCommandName} <your input>",
+                },
+            ];
+        }
+    }
+
     public class SlashDataGenerator : IDataGenerator
     {
         public const string ShortWindowCommandName = "winslash";
