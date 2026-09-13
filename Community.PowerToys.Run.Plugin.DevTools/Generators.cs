@@ -526,12 +526,14 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
 
     public class UrlDataGenerator : IDataGenerator
     {
+        public const string ShortEncodeCommandName = "urle";
         public const string EncodeCommandName = "urlencode";
+        public const string ShortDecodeCommandName = "urld";
         public const string DecodeCommandName = "urldecode";
 
         public List<GeneratedValue> GenerateValues(string commandName, string arguments)
         {
-            if (commandName == EncodeCommandName)
+            if (commandName == EncodeCommandName || commandName == ShortEncodeCommandName)
             {
                 return
                 [
@@ -543,7 +545,7 @@ namespace Community.PowerToys.Run.Plugin.Community.PowerToys.Run.Plugin.DevTools
                 ];
             }
 
-            if (commandName == DecodeCommandName)
+            if (commandName == DecodeCommandName || commandName == ShortDecodeCommandName)
             {
                 return
                 [
